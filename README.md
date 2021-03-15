@@ -1,3 +1,7 @@
+# Instrukcja Testowania
+Uruchamiamy initalize.sh
+
+
 # Projekt 2 - Arytmetyka liczb zespolonych
 
 ## Cel ćwiczenia
