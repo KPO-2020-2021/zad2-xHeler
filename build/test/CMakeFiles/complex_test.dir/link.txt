@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/complex_test.dir/TestComplex.cpp.o CMakeFiles/complex_test.dir/main.cpp.o  -o complex_test  ../libcomplex_lib.a ../lib/libgtest.a -lpthread 

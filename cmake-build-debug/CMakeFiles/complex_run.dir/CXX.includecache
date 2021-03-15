@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../inc/Complex.h
+iostream
+-
+string
+-
+
+/home/bartosz/Dokumenty/GitHub/Programowanie Obiektowe/zad2-xHeler/src/Complex.cpp
+stdexcept
+-
+Complex.h
+/home/bartosz/Dokumenty/GitHub/Programowanie Obiektowe/zad2-xHeler/src/Complex.h
+string
+-
+
+/home/bartosz/Dokumenty/GitHub/Programowanie Obiektowe/zad2-xHeler/src/main.cpp
+iostream
+-
+Complex.h
+/home/bartosz/Dokumenty/GitHub/Programowanie Obiektowe/zad2-xHeler/src/Complex.h
+
