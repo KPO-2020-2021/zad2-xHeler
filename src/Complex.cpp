@@ -1,6 +1,11 @@
 #include <stdexcept>
 #include "Complex.h"
 #include <string>
+#include <sstream>
+
+void putBackNumberToStream(std::istream &is, double number);
+bool isCharacterEqualsGet(std::istream &is, char character);
+
 
 Complex::Complex() {
     this->Re = 0;
@@ -36,7 +41,8 @@ Complex Complex::operator-(const Complex &Z) {
 }
 
 bool operator==(const Complex & Z1, const Complex & Z2) {
-    if (Z1.Re == Z2.Re && Z1.Im == Z2.Im) return true;
+    if (std::abs(Z1.Re - Z2.Re) < PRECISION_RIFFLE &&
+        std::abs(Z1.Im - Z2.Im) < PRECISION_RIFFLE) return true;
     return false;
 }
 
@@ -96,84 +102,115 @@ std::ostream & operator<<(std::ostream & os, const Complex &Z) {
 
 std::istream &operator>>(std::istream &is, Complex & Z) {
 
+    if (!isCharacterEqualsGet(is, '(')) throw std::invalid_argument("[Error] Syntax error.");
+    if (isReadableOnlyImaginary(is, Z)) return is;
+    if (isReadableOneSegment(is, Z)) return is; //! xd
+
+    if (isReadableComplexShort(is, Z)) return is;
+    if (isReadableFullComplex(is, Z)) return is;
+
+    throw std::invalid_argument("[Error] Syntax error.");
+}
+
+bool isReadableOnlyImaginary(std::istream &is, Complex &Z) {
+    //!  (i) (-i)
+    char tmp;
+    char op;
+
+    if(is.peek() == 'i') {
+        is >> tmp;
+        if (!isCharacterEqualsGet(is, ')')) return false;
+        Z.Re = 0;
+        Z.Im = 1;
+        return true;
+    }
+
+    if (is.peek() == '-') {
+        is >> op;
+        if (is.peek() == 'i') {
+            is >> tmp;
+            if (!isCharacterEqualsGet(is, ')')) return false;
+            Z.Re = 0;
+            Z.Im = -1;
+            return true;
+        }
+        is.putback(op);
+        return false;
+    }
+    return false;
+}
+
+bool isReadableOneSegment(std::istream &is, Complex &Z) {
+    //!  (-4) (-4i) (9) (9i)
+    char tmp;
     double number;
-    char characters[5];
 
-    is >> characters[0] >> characters[1] >> characters[2];
-    if (characters[0] == '(') { //! (i) (-i) (-4i)
-        if (characters[1] == '-'){
-            if (characters[2] == 'i') {
-                is >> characters[3];
-                if (characters[3] == ')') {
-                    Z.Re = 0;
-                    Z.Im = -1;
-                    return is;
-                }
-            }
-        } else if (characters[1] == 'i') {
-            if (characters[2] == ')') {
-                Z.Re = 0;
-                Z.Im = 1;
-                return is;
-            }
-        }
-    }
-
-    for (int i = 4; i >= 0; i--) {
-        if (characters[i] != NULL) {
-            is.putback(characters[i]);
-            characters[i] = NULL;
-        }
-    }
-
-    is >> characters[0] >> number >> characters[1];
-
-
-    if (characters[0] == '(' && characters[1] == ')') { //! (2)
-        Z.Re = number;
-        return is;
-    }
-
-    if (characters[0] == '(' && characters[1] == 'i') { //! (2i)
-        is >> characters[2];
-        if (characters[2] == ')') {
+    if(is.peek() == '-') {
+        is >> number;
+        if (is.peek() == 'i') {
+            is >> tmp;
+            if (!isCharacterEqualsGet(is, ')')) return false;
+            Z.Re = 0;
             Z.Im = number;
-            return is;
-        }
-        is.putback(characters[2]);
-    }
-
-    if (characters[0] == '(' && (characters[1] == '+' || characters[1] == '-')) { //! (2+i)
-        is >> characters[2];
-        if (characters[2] == 'i'){
+            return true;
+        } else if (is.peek() == ')') {
+            is >> tmp;
             Z.Re = number;
-            if (characters[1] == '+') {
-                Z.Im = 1;
-            } else {
-                Z.Im = -1;
-            }
-            return is;
+            Z.Im = 0;
+            return true;
         }
-        is.putback(characters[2]);
+        putBackNumberToStream(is, number);
+        return false;
     }
 
-    if (characters[0] == '(' && (characters[1] == '+' || characters[1] == '-')) { //! (2+3i)
-        double imag;
-        is >> imag >> characters[3] >> characters[4];
-        if (characters[3] == 'i' && characters[4] == ')') {
+
+    if (is.peek() > 47 && is.peek() < 58) {
+        is >> number;
+        if (is.peek() == 'i') {
+            is >> tmp;
+            if (!isCharacterEqualsGet(is, ')')) return false;
+            Z.Re = 0;
+            Z.Im = number;
+            return true;
+        } else if (is.peek() == ')') {
+            is >> tmp;
             Z.Re = number;
-            if (characters[1] == '+') {
-                Z.Im = imag;
-            } else if (characters[1] == '-') {
-                Z.Im = -imag;
-            }
-
-            return is;
+            Z.Im = 0;
+            return true;
         }
+        putBackNumberToStream(is, number);
+        return false;
     }
+    return false;
+}
 
-    throw std::invalid_argument("[Error] Complex syntax error!");
+bool isReadableComplexShort(std::istream &is, Complex &Z) {
+    //!  (4+i) (2-i)
+    char op;
+    char tmp;
+    double number;
 
+    if(is.peek() == 45 || is.peek() > 47 && is.peek() < 58) {
+        is >> number;
+        is >> op;
+        if (op == '+' && is.peek() == 'i') {
+            is >> tmp;
+            if (!isCharacterEqualsGet(is, ')')) return false;
+            Z.Re = number;
+            Z.Im = 1;
+            return true;
+        } else if (op == '-' && is.peek() == 'i') {
+            is >> tmp;
+            if (!isCharacterEqualsGet(is, ')')) return false;
+            Z.Re = number;
+            Z.Im = -1;
+            return true;
+        }
+        is.putback(op);
+        putBackNumberToStream(is, number);
+        return false;
+    }
+    return false;
 }
 
 double Complex::getReal() {
@@ -182,6 +219,48 @@ double Complex::getReal() {
 
 double Complex::getImag() {
     return Im;
+}
+
+bool isReadableFullComplex(std::istream &is, Complex &Z) {
+    //!  (4+3i) (4-5i)
+
+    is >> Z.Re;
+    if (is.fail()) return false;
+
+    is >> Z.Im;
+    if (is.fail()) return false;
+
+    if (!isCharacterEqualsGet(is, 'i')) return false;
+    if (!isCharacterEqualsGet(is, ')')) return false;
+
+    return true;
+}
+
+void putBackNumberToStream(std::istream &is, double number) {
+    std::stringstream str;
+    str.precision(2);
+    str << std::fixed << number;
+    int lastIndex = str.str().length();
+    for (int i = lastIndex - 1; i >= 0; i--){
+        if (lastIndex - 1 == i && str.str()[i] != '0'){
+            is.putback(str.str()[i]);
+        } else if (lastIndex - 2 == i && str.str()[i] != '0'){
+            is.putback(str.str()[i]);
+        } else if (lastIndex - 2 > i) {
+            is.putback(str.str()[i]);
+        }
+    }
+}
+
+bool isCharacterEqualsGet(std::istream &is, char character) {
+    char tmp;
+    is >> tmp;
+    if (is.fail()) return false;
+    if (tmp != character) {
+        is.putback(tmp);
+        return false;
+    }
+    return true;
 }
 
 

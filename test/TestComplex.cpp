@@ -9,8 +9,8 @@ TEST (Test, createEmptyConstructor) {
 
 TEST (Test, createBasicConstructor) {
     Complex result;
-    result.setComplex(1, 2);
-    EXPECT_EQ(Complex(1, 2), result);
+    result.setComplex(1.3333333333, 2.44444444);
+    EXPECT_EQ(Complex(1.33, 2.44), result);
 }
 
 TEST (Test, addTwoComplex) {

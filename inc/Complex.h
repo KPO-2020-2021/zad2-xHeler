@@ -4,11 +4,17 @@
 #ifndef COMPLEX_COMPLEX_H
 #define COMPLEX_COMPLEX_H
 
+const double PRECISION_RIFFLE = 0.01;
+
 class Complex {
 private:
     double Re;
     double Im;
 
+    friend bool isReadableOnlyImaginary(std::istream & is, Complex & Z);
+    friend bool isReadableOneSegment(std::istream & is, Complex & Z);
+    friend bool isReadableComplexShort(std::istream & is, Complex & Z);
+    friend bool isReadableFullComplex(std::istream & is, Complex & Z);
 public:
     Complex();
     Complex(double Re, double Im = 0);
