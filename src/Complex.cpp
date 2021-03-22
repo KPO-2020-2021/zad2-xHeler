@@ -1,5 +1,5 @@
-#include <stdexcept>
 #include "Complex.h"
+#include <stdexcept>
 #include <string>
 #include <sstream>
 
@@ -102,13 +102,18 @@ std::ostream & operator<<(std::ostream & os, const Complex &Z) {
 
 std::istream &operator>>(std::istream &is, Complex & Z) {
 
-    if (!isCharacterEqualsGet(is, '(')) throw std::invalid_argument("[Error] Syntax error.");
+    if (!isCharacterEqualsGet(is, '(')){
+        std::string bin;
+        is >> bin;
+        throw std::invalid_argument("[Error] Syntax error.");
+    }
     if (isReadableOnlyImaginary(is, Z)) return is;
-    if (isReadableOneSegment(is, Z)) return is; //! xd
-
+    if (isReadableOneSegment(is, Z)) return is;
     if (isReadableComplexShort(is, Z)) return is;
     if (isReadableFullComplex(is, Z)) return is;
 
+    std::string bin;
+    is >> bin;
     throw std::invalid_argument("[Error] Syntax error.");
 }
 
@@ -165,6 +170,7 @@ bool isReadableOneSegment(std::istream &is, Complex &Z) {
 
 
     if (is.peek() > 47 && is.peek() < 58) {
+
         is >> number;
         if (is.peek() == 'i') {
             is >> tmp;
@@ -181,6 +187,7 @@ bool isReadableOneSegment(std::istream &is, Complex &Z) {
         putBackNumberToStream(is, number);
         return false;
     }
+
     return false;
 }
 
@@ -237,17 +244,26 @@ bool isReadableFullComplex(std::istream &is, Complex &Z) {
 }
 
 void putBackNumberToStream(std::istream &is, double number) {
-    std::stringstream str;
-    str.precision(2);
-    str << std::fixed << number;
-    int lastIndex = str.str().length();
-    for (int i = lastIndex - 1; i >= 0; i--){
-        if (lastIndex - 1 == i && str.str()[i] != '0'){
-            is.putback(str.str()[i]);
-        } else if (lastIndex - 2 == i && str.str()[i] != '0'){
-            is.putback(str.str()[i]);
-        } else if (lastIndex - 2 > i) {
-            is.putback(str.str()[i]);
+    if ((number - (int) number) == 0) {
+        int tmp = number;
+        std::string str = std::to_string(tmp);
+        for (int i = str.length() - 1; i >= 0; i--) {
+            is.putback(str[i]);
+        }
+    } else {
+        std::stringstream str;
+        str.precision(2);
+        str << std::fixed << number;
+        int lastIndex = str.str().length();
+
+        for (int i = lastIndex - 1; i >= 0; i--){
+            if (lastIndex - 1 == i && str.str()[i] != '0'){
+                is.putback(str.str()[i]);
+            } else if (lastIndex - 2 == i && str.str()[i] != '0'){
+                is.putback(str.str()[i]);
+            } else if (lastIndex - 2 > i) {
+                is.putback(str.str()[i]);
+            }
         }
     }
 }

@@ -52,3 +52,15 @@ TEST (Test, DivisionCalculateExpression) {
     Complex result(4, 0);
     ASSERT_EQ(result, ce.calculateExpression());
 }
+
+TEST (Test, ThrowSyntaxError) {
+    ComplexExpression result(Complex(), Complex(), EOF);
+    ComplexExpression ce;
+    std::stringstream ss;
+
+    ss << "2+3i)+(2+9i)";
+    ss >> ce;
+
+    ASSERT_EQ(result.getOp(), EOF);
+
+}

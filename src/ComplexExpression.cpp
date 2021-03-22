@@ -55,14 +55,19 @@ std::istream &operator>>(std::istream &is, ComplexExpression &ce) {
     Complex z1, z2;
     char op;
 
-    is >> z1;
-    if (is.fail()) return is;
+    try {
+        is >> z1;
+        if (is.fail()) return is;
 
-    is >> op;
-    if (is.fail()) return is;
+        is >> op;
+        if (is.fail()) return is;
 
-    is >> z2;
-    if (is.fail()) return is;
+        is >> z2;
+        if (is.fail()) return is;
+    } catch (std::exception e) {
+        is.clear();
+        return is;
+    }
 
     ce.setOp(op);
     ce.setZ1(z1);
