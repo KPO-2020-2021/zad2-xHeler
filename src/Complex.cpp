@@ -112,8 +112,6 @@ std::istream &operator>>(std::istream &is, Complex & Z) {
     if (isReadableComplexShort(is, Z)) return is;
     if (isReadableFullComplex(is, Z)) return is;
 
-    std::string bin;
-    is >> bin;
     throw std::invalid_argument("[Error] Syntax error.");
 }
 
@@ -199,6 +197,8 @@ bool isReadableComplexShort(std::istream &is, Complex &Z) {
 
     if(is.peek() == 45 || is.peek() > 47 && is.peek() < 58) {
         is >> number;
+        if (is.fail()) return false;
+
         is >> op;
         if (op == '+' && is.peek() == 'i') {
             is >> tmp;

@@ -1,8 +1,8 @@
 #include <iostream>
-#include "Complex.h"
+#include "Examiner.h"
 
-int main() {
-
+int main(int argc, char** argv) {
+    Examiner ex(argv[1]);
     return 0;
 }
 
